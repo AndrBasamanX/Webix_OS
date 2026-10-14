@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Webix OS WebApp</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="bg-glow"></div>
+
+    <div class="app-container">
+        <!-- Шапка OS -->
+        <header class="os-card header-card">
+            <div class="brand">
+                <div class="logo-badge"><i class="fa-solid fa-microchip"></i></div>
+                <div>
+                    <h1>Webix OS <span class="version-tag">v2.5</span></h1>
+                    <span class="status-online"><span class="dot"></span> System Ready</span>
+                </div>
+            </div>
+            <div id="clock" class="clock-badge">00:00:00</div>
+        </header>
+
+        <!-- Навігація між екранами -->
+        <nav class="os-nav">
+            <button class="nav-tab active" onclick="switchTab('home')">
+                <i class="fa-solid fa-house"></i>
+                <span>Дашборд</span>
+            </button>
+            <button class="nav-tab" onclick="switchTab('clicker')">
+                <i class="fa-solid fa-bolt"></i>
+                <span>Ядро</span>
+            </button>
+            <button class="nav-tab" onclick="switchTab('tasks')">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Завдання</span>
+            </button>
+            <button class="nav-tab" onclick="switchTab('weather')">
+                <i class="fa-solid fa-cloud-bolt"></i>
+                <span>Погода</span>
+            </button>
+            <button class="nav-tab" onclick="switchTab('profile')">
+                <i class="fa-solid fa-sliders"></i>
+                <span>Профіль</span>
+            </button>
+        </nav>
+
+        <!-- Основні екрани -->
+        <main class="content">
+            <!-- Екран 1: Головна / Дашборд -->
+            <section id="screen-home" class="screen active">
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <i class="fa-solid fa-cpu icon-blue"></i>
+                        <span class="stat-value" id="cpu-usage">12%</span>
+                        <span class="stat-label">Завантаження CPU</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-memory icon-purple"></i>
+                        <span class="stat-value" id="ram-usage">420 MB</span>
+                        <span class="stat-label">Пам'ять RAM</span>
+                    </div>
+                </div>
+
+                <div class="os-card progress-card">
+                    <div class="p-header">
+                        <span>Заряд генератора Webix</span>
+                        <strong id="energy-percent">0%</strong>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div id="energy-bar" class="progress-bar-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <div class="menu-list">
+                    <button class="action-card" onclick="switchTab('clicker')">
+                        <div class="card-icon orange"><i class="fa-solid fa-gamepad"></i></div>
+                        <div class="card-info">
+                            <span class="title">Міні-гра «Енерго-Ядро»</span>
+                            <span class="subtitle">Генеруй енергію для Telegram бота</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right arrow"></i>
+                    </button>
+
+                    <button class="action-card" onclick="handleNativePopup()">
+                        <div class="card-icon blue"><i class="fa-solid fa-window-restore"></i></div>
+                        <div class="card-info">
+                            <span class="title">Telegram Native Popup</span>
+                            <span class="subtitle">Діалогове вікно з кнопками</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right arrow"></i>
+                    </button>
+
+                    <button class="action-card" onclick="toggleMainButton()">
+                        <div class="card-icon green"><i class="fa-solid fa-toggle-on"></i></div>
+                        <div class="card-info">
+                            <span class="title">Тест MainButton SDK</span>
+                            <span class="subtitle">Показати/приховати нижню кнопку</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right arrow"></i>
+                    </button>
+
+                    <button class="action-card" onclick="openQrScanner()">
+                        <div class="card-icon purple"><i class="fa-solid fa-qrcode"></i></div>
+                        <div class="card-info">
+                            <span class="title">Сканер QR-кодів</span>
+                            <span class="subtitle">Нативний сканер Telegram</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right arrow"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Екран 2: Клікер (Energy Generator) -->
+            <section id="screen-clicker" class="screen">
+                <div class="os-card clicker-card">
+                    <h3>Енергетичне Ядро</h3>
+                    <p class="clicker-desc">Клікай по ядру, збирай енергію та відправляй боту!</p>
+                    
+                    <div class="energy-score">
+                        <span id="click-count">0</span>
+                        <small>EP (Energy Points)</small>
+                    </div>
+
+                    <div class="core-button-wrapper">
+                        <button class="core-btn" id="core-btn" onclick="clickEnergyCore()">
+                            <i class="fa-solid fa-atom"></i>
+                        </button>
+                    </div>
+
+                    <button class="send-bot-btn" onclick="sendEnergyToBot()">
+                        <i class="fa-paper-plane fa-solid"></i> Надіслати енергію в Бот
+                    </button>
+                </div>
+            </section>
+
+            <!-- Екран 3: Завдання (ToDo) -->
+            <section id="screen-tasks" class="screen">
+                <div class="os-card task-input-card">
+                    <input type="text" id="task-input" placeholder="Нова задача..." onkeypress="handleTaskKeyPress(event)">
+                    <button class="add-btn" onclick="addTask()"><i class="fa-solid fa-plus"></i></button>
+                </div>
+                <div id="todo-list" class="todo-list"></div>
+            </section>
+
+            <!-- Екран 4: Погода (Український пошук) -->
+            <section id="screen-weather" class="screen">
+                <div class="weather-search">
+                    <input type="text" id="city-input" placeholder="Введіть місто (напр. Львів, Київ, Одеса)" onkeypress="handleWeatherKeyPress(event)">
+                    <button onclick="fetchWeather()"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+                <div class="os-card weather-card">
+                    <div class="weather-header">
+                        <i id="weather-icon" class="fa-solid fa-sun sun"></i>
+                        <span id="weather-city" class="weather-city">Київ</span>
+                    </div>
+                    <div id="weather-temp" class="weather-temp">+18°C</div>
+                    <div id="weather-desc" class="weather-desc">Сонячно</div>
+                    <div class="weather-metrics">
+                        <div><i class="fa-solid fa-wind"></i> <span id="weather-wind">3.5 км/г</span></div>
+                        <div><i class="fa-solid fa-droplet"></i> <span id="weather-humidity">55%</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Екран 5: Профіль & Налаштування -->
+            <section id="screen-profile" class="screen">
+                <div class="os-card profile-card">
+                    <div class="avatar-container">
+                        <img id="user-photo" class="avatar-img hidden" src="" alt="Avatar">
+                        <div id="avatar-fallback" class="avatar-fallback"><i class="fa-solid fa-user-astronaut"></i></div>
+                    </div>
+                    <h3 id="user-name">Завантаження...</h3>
+                    <span id="user-username" class="user-handle">@username</span>
+                    
+                    <div class="profile-info-grid">
+                        <div class="p-item" onclick="copyToClipboard('user-id')">
+                            <span>Telegram ID</span>
+                            <strong id="user-id">---</strong>
+                        </div>
+                        <div class="p-item"><span>Мова</span><strong id="user-lang">uk</strong></div>
+                        <div class="p-item"><span>Платформа</span><strong id="user-platform">WebApp</strong></div>
+                    </div>
+
+                    <button class="theme-change-btn" onclick="toggleThemeColor()">
+                        <i class="fa-solid fa-palette"></i> Змінити колірну гаму
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Custom Toast -->
+        <div id="toast" class="toast hidden">
+            <i class="fa-solid fa-bell"></i>
+            <span id="toast-message">Сповіщення</span>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
