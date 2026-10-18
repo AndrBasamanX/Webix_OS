@@ -203,13 +203,22 @@ function sendEnergyToBot() {
     };
 
     const sentEnergy = energyPoints;
-    energyPoints = 0;
-    localStorage.setItem('webix_energy', 0);
-    updateEnergyUI();
 
     if (tg?.sendData) {
-        tg.sendData(JSON.stringify(payload));
+        try {
+            tg.sendData(JSON.stringify(payload));
+            energyPoints = 0;
+            localStorage.setItem('webix_energy', 0);
+            updateEnergyUI();
+            showToast(`Відправлено: ${sentEnergy} EP!`);
+        } catch (err) {
+            console.error("Помилка відправки в Telegram:", err);
+            showToast('Помилка: відкрийте WebApp через кнопку чату /start');
+        }
     } else {
+        energyPoints = 0;
+        localStorage.setItem('webix_energy', 0);
+        updateEnergyUI();
         showToast(`[Dev Mode] Передано: ${sentEnergy} EP!`);
     }
 }
