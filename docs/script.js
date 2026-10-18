@@ -13,11 +13,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tg.setHeaderColor) {
             tg.setHeaderColor('#090d16');
         }
+
+        // Налаштовуємо нативну кнопку "Назад" один раз
+        if (tg.BackButton) {
+            tg.BackButton.onClick(() => {
+                switchTab('home');
+            });
+        }
     }
     
     updateClock();
     setInterval(updateClock, 1000);
     startSystemStatsSimulation();
+    updateEnergyUI();
     renderTasks();
 });
 
@@ -53,9 +61,8 @@ function switchTab(tabName) {
     const selectedScreen = document.getElementById(`screen-${tabName}`);
     if (selectedScreen) selectedScreen.classList.add('active');
 
-    if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
-    }
+    const activeNavBtn = document.querySelector(`.nav-tab[data-tab="${tabName}"]`);
+    if (activeNavBtn) activeNavBtn.classList.add('active');
 
     // Робота з нативною кнопкою "Назад" у Telegram
     if (tg?.BackButton) {
@@ -63,9 +70,6 @@ function switchTab(tabName) {
             tg.BackButton.hide();
         } else {
             tg.BackButton.show();
-            tg.BackButton.onClick(() => {
-                switchTab('home');
-            });
         }
     }
 }
@@ -164,8 +168,7 @@ function toggleMainButton() {
 // 6. Міні-гра «Енерго-Ядро» (Energy Core Clicker)
 let energyPoints = parseInt(localStorage.getItem('webix_energy')) || 0;
 
-function clickEnergyCore() {
-    energyPoints += 1;
+function updateEnergyUI() {
     const countEl = document.getElementById('click-count');
     if (countEl) countEl.textContent = energyPoints;
     
@@ -175,7 +178,11 @@ function clickEnergyCore() {
 
     if (percentEl) percentEl.textContent = `${progressPercent}%`;
     if (barEl) barEl.style.width = `${progressPercent}%`;
+}
 
+function clickEnergyCore() {
+    energyPoints += 1;
+    updateEnergyUI();
     localStorage.setItem('webix_energy', energyPoints);
 
     if (tg?.HapticFeedback) {
@@ -195,10 +202,15 @@ function sendEnergyToBot() {
         timestamp: new Date().toISOString()
     };
 
+    const sentEnergy = energyPoints;
+    energyPoints = 0;
+    localStorage.setItem('webix_energy', 0);
+    updateEnergyUI();
+
     if (tg?.sendData) {
         tg.sendData(JSON.stringify(payload));
     } else {
-        showToast(`[Dev Mode] Накопичено: ${energyPoints} EP`);
+        showToast(`[Dev Mode] Передано: ${sentEnergy} EP!`);
     }
 }
 
@@ -307,7 +319,10 @@ async function fetchWeather() {
         const currentWeather = weatherData.current_weather;
         const temp = Math.round(currentWeather.temperature);
         const wind = currentWeather.windspeed;
-        const humidity = weatherData.hourly.relativehumidity_2m[0];
+        const currentHour = new Date().getHours();
+        const humidity = (weatherData.hourly && weatherData.hourly.relativehumidity_2m)
+            ? (weatherData.hourly.relativehumidity_2m[currentHour] ?? weatherData.hourly.relativehumidity_2m[0])
+            : 50;
         const weatherState = getWeatherDescription(currentWeather.weathercode);
 
         const cityEl = document.getElementById('weather-city');
@@ -340,11 +355,29 @@ function toggleThemeColor() {
     showToast('Тему змінено!');
 }
 
-function copyToClipboard(elementId) {
+async function copyToClipboard(elementId) {
     const el = document.getElementById(elementId);
-    if (el && navigator.clipboard) {
-        navigator.clipboard.writeText(el.textContent);
+    if (!el) return;
+    const text = el.textContent.trim();
+    if (!text || text === '---') return;
+
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+        } else {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+        }
         showToast('ID скопійовано!');
+    } catch (e) {
+        showToast('Не вдалося скопіювати');
     }
 }
 
