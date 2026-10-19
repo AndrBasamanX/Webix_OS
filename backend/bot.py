@@ -6,7 +6,7 @@ import aiosqlite
 import asyncpg
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, F, types
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, CommandObject
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
 
 load_dotenv()
@@ -110,7 +110,30 @@ async def setup_database() -> Database:
 
 # --- ОБРОБНИКИ КОМАНД ---
 @dp.message(CommandStart())
-async def cmd_start(message: types.Message):
+async def cmd_start(message: types.Message, command: CommandObject, db: Database):
+    # Обробка передачі енергії через deep-link (працює з Main Web App, кнопкою меню та посиланнями)
+    if command.args and command.args.startswith("energy_"):
+        try:
+            energy_sent = int(command.args.replace("energy_", ""))
+        except (ValueError, TypeError):
+            energy_sent = 0
+
+        if energy_sent > 0:
+            user_id = message.from_user.id
+            full_name = message.from_user.full_name
+            total_energy, level = await db.update_user_energy(user_id, full_name, energy_sent)
+            db_label = "PostgreSQL 🐘" if db.db_type == "postgres" else "SQLite 📁"
+
+            await message.answer(
+                f"⚡ **Енергію успішно передано!**\n\n"
+                f"📥 Отримано за сесію: **+{energy_sent} EP**\n"
+                f"🔋 Всього на балансі: **{total_energy} EP**\n"
+                f"🏆 Ваш рівень: **Level {level}**\n\n"
+                f"Дані збережено у {db_label}",
+                parse_mode="Markdown"
+            )
+            return
+
     keyboard = ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="⚡ Відкрити Webix OS", web_app=WebAppInfo(url=WEBAPP_URL))]

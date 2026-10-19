@@ -1,5 +1,6 @@
 // Telegram WebApp SDK Instance
 const tg = window.Telegram?.WebApp;
+const BOT_USERNAME = "Webixbot_app_bot";
 
 // 1. Ініціалізація додатка
 document.addEventListener('DOMContentLoaded', () => {
@@ -203,24 +204,30 @@ function sendEnergyToBot() {
     };
 
     const sentEnergy = energyPoints;
+    energyPoints = 0;
+    localStorage.setItem('webix_energy', 0);
+    updateEnergyUI();
 
+    // 1. Спробуємо надіслати через нативний sendData (працює, якщо відкрито через KeyboardButton)
+    let sendDataCalled = false;
     if (tg?.sendData) {
         try {
             tg.sendData(JSON.stringify(payload));
-            energyPoints = 0;
-            localStorage.setItem('webix_energy', 0);
-            updateEnergyUI();
-            showToast(`Відправлено: ${sentEnergy} EP!`);
+            sendDataCalled = true;
         } catch (err) {
-            console.error("Помилка відправки в Telegram:", err);
-            showToast('Помилка: відкрийте WebApp через кнопку чату /start');
+            console.log("sendData не підтримується для цього режиму відкриття");
         }
-    } else {
-        energyPoints = 0;
-        localStorage.setItem('webix_energy', 0);
-        updateEnergyUI();
-        showToast(`[Dev Mode] Передано: ${sentEnergy} EP!`);
     }
+
+    // 2. Для Main Web App, кнопки меню або прямих посилань Telegram вимагає deep link:
+    // Якщо додаток не закрився миттєво через sendData, перенаправляємо в бот з параметром
+    setTimeout(() => {
+        if (tg?.openTelegramLink) {
+            tg.openTelegramLink(`https://t.me/${BOT_USERNAME}?start=energy_${sentEnergy}`);
+        } else {
+            showToast(`[Dev Mode] Передано: ${sentEnergy} EP!`);
+        }
+    }, sendDataCalled ? 200 : 0);
 }
 
 // 7. Менеджер завдань (ToDo)
