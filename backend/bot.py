@@ -7,7 +7,7 @@ import asyncpg
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import CommandStart, CommandObject
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove, WebAppInfo
 
 load_dotenv()
 
@@ -22,6 +22,7 @@ bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 # --- УНІВЕРСАЛЬНИЙ КЛАС РОБОТИ З БАЗОЮ (PostgreSQL / SQLite) ---
+
 class Database:
     def __init__(self, db_type: str, pool_or_conn):
         self.db_type = db_type
@@ -70,29 +71,29 @@ class Database:
                     )
                 return current_energy, new_level
         else:
-            async with self.db.execute("SELECT energy, level FROM users WHERE user_id = ?", (user_id,)) as cursor:
+            async with self.db.execute("SELECT energy, level FROM users WHERE user_id = $1", (user_id,)) as cursor:
                 row = await cursor.fetchone()
                 if row:
                     current_energy = row[0] + added_energy
                     new_level = (current_energy // 100) + 1
                     await self.db.execute(
-                        "UPDATE users SET energy = ?, level = ?, full_name = ? WHERE user_id = ?",
+                        "UPDATE users SET energy = $1, level = $2, full_name = $3 WHERE user_id = $4",
                         (current_energy, new_level, full_name, user_id)
                     )
                 else:
                     current_energy = added_energy
                     new_level = (current_energy // 100) + 1
                     await self.db.execute(
-                        "INSERT INTO users (user_id, full_name, energy, level) VALUES (?, ?, ?, ?)",
+                        "INSERT INTO users (user_id, full_name, energy, level) VALUES ($1, $2, $3, $4)",
                         (user_id, full_name, current_energy, new_level)
                     )
             await self.db.commit()
             return current_energy, new_level
 
 async def setup_database() -> Database:
-    if DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://"):
+    if True:
         try:
-            pool = await asyncio.wait_for(asyncpg.create_pool(DATABASE_URL), timeout=3.0)
+            pool = await asyncio.wait_for(asyncpg.create_pool('postgresql://project_user:11102007@127.0.0.1:5432/my_project_db'), timeout=3.0)
             db = Database("postgres", pool)
             await db.init()
             logging.info("🐘 Успішно підключено до PostgreSQL!")
@@ -134,15 +135,17 @@ async def cmd_start(message: types.Message, command: CommandObject, db: Database
             )
             return
 
-    keyboard = ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="⚡ Відкрити Webix OS", web_app=WebAppInfo(url=WEBAPP_URL))]
-        ],
-        resize_keyboard=True
+    # Примусово створюємо користувача в PostgreSQL з 0 енергії при звичайному /start
+    await db.update_user_energy(message.from_user.id, message.from_user.full_name, 0)
+
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="⚡ Відкрити Webix OS", web_app=WebAppInfo(url=WEBAPP_URL))]
+        ]
     )
     await message.answer(
         f"Вітаю, {message.from_user.first_name}! 🚀\n\n"
-        f"Натисніть кнопку нижче, щоб відкрити Webix OS:",
+        f"Натисніть кнопку нижче або кнопку «Menu», щоб відкрити Webix OS:",
         reply_markup=keyboard
     )
 
