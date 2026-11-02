@@ -1,15 +1,24 @@
-import os
+# backend/settings.py
+# Аліас до backend/config.py для зручності та зворотної сумісності
+import sys
+from pathlib import Path
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'neondb',
-        'USER': 'neondb_owner',
-        'PASSWORD': 'npg_J5Z1YgjVIkcr',
-        'HOST': 'ep-bitter-sunset-b782v6d6-pooler.c-13.us-east-1.aws.neon.tech',
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
-    }
-}
+from backend.config import (
+    BOT_TOKEN,
+    DATABASE_URL,
+    WEBAPP_URL,
+    SQLITE_PATH,
+    BOT_USERNAME,
+)
+
+__all__ = [
+    "BOT_TOKEN",
+    "DATABASE_URL",
+    "WEBAPP_URL",
+    "SQLITE_PATH",
+    "BOT_USERNAME",
+]
+

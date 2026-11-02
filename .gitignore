@@ -5,3 +5,6 @@ __pycache__/
 .vscode/
 *.db
 *.sqlite3
+node_modules/
+frontend-react/node_modules/
+frontend-react/dist/

@@ -1,192 +1,64 @@
 import asyncio
-import json
 import logging
-import os
-import aiosqlite
-import asyncpg
-from dotenv import load_dotenv
-from aiogram import Bot, Dispatcher, F, types
-from aiogram.filters import CommandStart, CommandObject
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove, WebAppInfo
+import sys
+from pathlib import Path
 
-load_dotenv()
+# Додаємо корінь проєкту до sys.path для надійної роботи імпортів
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-if not BOT_TOKEN:
-    raise ValueError("BOT_TOKEN не задано! Вкажіть його у файлі .env або змінних оточення.")
+from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 
-WEBAPP_URL = os.getenv("WEBAPP_URL", "https://andrbasamanx.github.io/Webix_OS/")
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///webix.db")
+from backend.config import BOT_TOKEN, DATABASE_URL, SQLITE_PATH, BOT_USERNAME
+from backend.database import setup_database
+from backend.handlers import router
 
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher()
-
-# --- УНІВЕРСАЛЬНИЙ КЛАС РОБОТИ З БАЗОЮ (PostgreSQL / SQLite) ---
-
-class Database:
-    def __init__(self, db_type: str, pool_or_conn):
-        self.db_type = db_type
-        self.db = pool_or_conn
-
-    async def init(self):
-        if self.db_type == "postgres":
-            async with self.db.acquire() as conn:
-                await conn.execute("""
-                    CREATE TABLE IF NOT EXISTS users (
-                        user_id BIGINT PRIMARY KEY,
-                        full_name TEXT,
-                        energy INT DEFAULT 0,
-                        level INT DEFAULT 1
-                    );
-                """)
-        else:
-            async with self.db.cursor() as cursor:
-                await cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS users (
-                        user_id INTEGER PRIMARY KEY,
-                        full_name TEXT,
-                        energy INTEGER DEFAULT 0,
-                        level INTEGER DEFAULT 1
-                    );
-                """)
-            await self.db.commit()
-
-    async def update_user_energy(self, user_id: int, full_name: str, added_energy: int):
-        if self.db_type == "postgres":
-            async with self.db.acquire() as conn:
-                row = await conn.fetchrow("SELECT energy, level FROM users WHERE user_id = $1", user_id)
-                if row:
-                    current_energy = row['energy'] + added_energy
-                    new_level = (current_energy // 100) + 1
-                    await conn.execute(
-                        "UPDATE users SET energy = $1, level = $2, full_name = $3 WHERE user_id = $4",
-                        current_energy, new_level, full_name, user_id
-                    )
-                else:
-                    current_energy = added_energy
-                    new_level = (current_energy // 100) + 1
-                    await conn.execute(
-                        "INSERT INTO users (user_id, full_name, energy, level) VALUES ($1, $2, $3, $4)",
-                        user_id, full_name, current_energy, new_level
-                    )
-                return current_energy, new_level
-        else:
-            async with self.db.execute("SELECT energy, level FROM users WHERE user_id = $1", (user_id,)) as cursor:
-                row = await cursor.fetchone()
-                if row:
-                    current_energy = row[0] + added_energy
-                    new_level = (current_energy // 100) + 1
-                    await self.db.execute(
-                        "UPDATE users SET energy = $1, level = $2, full_name = $3 WHERE user_id = $4",
-                        (current_energy, new_level, full_name, user_id)
-                    )
-                else:
-                    current_energy = added_energy
-                    new_level = (current_energy // 100) + 1
-                    await self.db.execute(
-                        "INSERT INTO users (user_id, full_name, energy, level) VALUES ($1, $2, $3, $4)",
-                        (user_id, full_name, current_energy, new_level)
-                    )
-            await self.db.commit()
-            return current_energy, new_level
-
-async def setup_database() -> Database:
-    if True:
-        try:
-            pool = await asyncio.wait_for(asyncpg.create_pool('postgresql://project_user:11102007@127.0.0.1:5432/my_project_db'), timeout=3.0)
-            db = Database("postgres", pool)
-            await db.init()
-            logging.info("🐘 Успішно підключено до PostgreSQL!")
-            return db
-        except Exception as e:
-            logging.warning(f"⚠️ Не вдалося підключитися до PostgreSQL: {e}. Переходимо на SQLite...")
-    
-    # Локальний SQLite як надійний fallback
-    db_file = os.getenv("SQLITE_PATH", "webix.db")
-    conn = await aiosqlite.connect(db_file)
-    db = Database("sqlite", conn)
-    await db.init()
-    logging.info(f"📁 Використовуємо локальну базу SQLite ({db_file})")
-    return db
-
-# --- ОБРОБНИКИ КОМАНД ---
-@dp.message(CommandStart())
-async def cmd_start(message: types.Message, command: CommandObject, db: Database):
-    # Обробка передачі енергії через deep-link (працює з Main Web App, кнопкою меню та посиланнями)
-    if command.args and command.args.startswith("energy_"):
-        try:
-            energy_sent = int(command.args.replace("energy_", ""))
-        except (ValueError, TypeError):
-            energy_sent = 0
-
-        if energy_sent > 0:
-            user_id = message.from_user.id
-            full_name = message.from_user.full_name
-            total_energy, level = await db.update_user_energy(user_id, full_name, energy_sent)
-            db_label = "PostgreSQL 🐘" if db.db_type == "postgres" else "SQLite 📁"
-
-            await message.answer(
-                f"⚡ **Енергію успішно передано!**\n\n"
-                f"📥 Отримано за сесію: **+{energy_sent} EP**\n"
-                f"🔋 Всього на балансі: **{total_energy} EP**\n"
-                f"🏆 Ваш рівень: **Level {level}**\n\n"
-                f"Дані збережено у {db_label}",
-                parse_mode="Markdown"
-            )
-            return
-
-    # Примусово створюємо користувача в PostgreSQL з 0 енергії при звичайному /start
-    await db.update_user_energy(message.from_user.id, message.from_user.full_name, 0)
-
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="⚡ Відкрити Webix OS", web_app=WebAppInfo(url=WEBAPP_URL))]
-        ]
-    )
-    await message.answer(
-        f"Вітаю, {message.from_user.first_name}! 🚀\n\n"
-        f"Натисніть кнопку нижче або кнопку «Menu», щоб відкрити Webix OS:",
-        reply_markup=keyboard
-    )
-
-@dp.message(F.web_app_data)
-async def handle_webapp_data(message: types.Message, db: Database):
-    try:
-        raw_data = message.web_app_data.data
-        data = json.loads(raw_data)
-        
-        action = data.get("action")
-        try:
-            energy_sent = int(data.get("energy", 0))
-        except (ValueError, TypeError):
-            energy_sent = 0
-
-        if action == "energy_transfer" and energy_sent > 0:
-            user_id = message.from_user.id
-            full_name = message.from_user.full_name
-            
-            total_energy, level = await db.update_user_energy(user_id, full_name, energy_sent)
-            db_label = "PostgreSQL 🐘" if db.db_type == "postgres" else "SQLite 📁"
-
-            await message.answer(
-                f"⚡ **Енергію успішно передано!**\n\n"
-                f"📥 Отримано за сесію: **+{energy_sent} EP**\n"
-                f"🔋 Всього на балансі: **{total_energy} EP**\n"
-                f"🏆 Ваш рівень: **Level {level}**\n\n"
-                f"Дані збережено у {db_label}",
-                parse_mode="Markdown"
-            )
-    except Exception as e:
-        logging.error(f"Помилка обробки: {e}")
-        await message.answer(f"Помилка при збереженні: {e}")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger("WebixBot")
 
 async def main():
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-    
-    db = await setup_database()
-    print("🤖 Бот Webix OS успішно запущено...")
-    
-    await dp.start_polling(bot, db=db)
+    if not BOT_TOKEN:
+        logger.error("❌ BOT_TOKEN не знайдено! Перевірте файл .env.")
+        return
+
+    # Ініціалізація бази даних (з авто-перемиканням PostgreSQL -> SQLite)
+    db = await setup_database(DATABASE_URL, SQLITE_PATH)
+
+    # Ініціалізація бота та диспетчера
+    bot = Bot(
+        token=BOT_TOKEN,
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+    )
+    dp = Dispatcher()
+
+    # Підключення роутера обробників
+    dp.include_router(router)
+
+    # Видаляємо вебхук без видалення черги повідомлень
+    try:
+        await bot.delete_webhook(drop_pending_updates=False)
+    except Exception as e:
+        logger.warning(f"⚠️ Не вдалося видалити старий webhook: {e}")
+
+    logger.info(f"🤖 Webix OS Бот (@{BOT_USERNAME}) готовий до роботи!")
+    logger.info("⚡️ Очікування повідомлень від користувачів...")
+
+    try:
+        await dp.start_polling(bot, db=db)
+    finally:
+        logger.info("Зупинка бота...")
+        await bot.session.close()
+        await db.close()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        logger.info("Бот зупинений вручну.")

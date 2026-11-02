@@ -1,0 +1,683 @@
+
+/* =====================================================
+   ADMIN PANEL STYLES — Webix OS AdminApp
+   ===================================================== */
+
+/* --- Змінні кольорів адміна --- */
+:root {
+  --accent-admin: #f59e0b;
+  --accent-admin-dark: #d97706;
+  --admin-header-bg: #0d1117;
+  --admin-nav-bg: #111827;
+  --admin-card-bg: rgba(15, 23, 42, 0.9);
+}
+
+/* --- Адмін glow --- */
+.admin-glow {
+  background: radial-gradient(ellipse at 50% 0%, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+}
+
+/* --- Адмін контейнер --- */
+.admin-container {
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* --- Адмін шапка --- */
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.2rem;
+  background: var(--admin-header-bg);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.admin-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-header-crown {
+  font-size: 1.3rem;
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8));
+}
+
+.admin-header-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--accent-admin);
+  text-transform: uppercase;
+}
+
+.admin-header-user {
+  text-align: right;
+}
+
+.admin-header-name {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+/* --- Адмін навігація (горизонтальний скрол) --- */
+.admin-nav {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--admin-nav-bg);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.15);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.admin-nav::-webkit-scrollbar { display: none; }
+
+.admin-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.admin-nav-btn.active {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--accent-admin);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.admin-nav-icon { font-size: 1rem; }
+.admin-nav-label { font-size: 0.65rem; font-weight: 600; }
+
+/* --- Адмін контент --- */
+.admin-content {
+  padding: 1rem;
+}
+
+/* --- Загальний контейнер екрану --- */
+.admin-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-screen-header h2 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--accent-admin);
+  margin-bottom: 0.3rem;
+}
+
+.admin-screen-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* --- Dashboard --- */
+.admin-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-welcome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--admin-card-bg);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+}
+
+.admin-welcome-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-crown {
+  font-size: 2rem;
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.9));
+}
+
+.admin-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.admin-role {
+  font-size: 0.7rem;
+  color: var(--accent-admin);
+  font-weight: 600;
+}
+
+.admin-time {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent-admin);
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-version-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(245, 158, 11, 0.08);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.admin-badge-online {
+  color: #10b981;
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+
+/* --- Картки швидкого доступу --- */
+.admin-section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: -0.25rem;
+}
+
+.admin-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.admin-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  padding: 1rem;
+  background: var(--admin-card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-left: 3px solid var(--card-color, #f59e0b);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.admin-card:hover,
+.admin-card:active {
+  border-color: var(--card-color, #f59e0b);
+  background: rgba(245, 158, 11, 0.08);
+  transform: translateY(-1px);
+}
+
+.admin-card-icon { font-size: 1.4rem; }
+.admin-card-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.admin-card-desc {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+
+/* --- Команди бота --- */
+.admin-commands {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  background: var(--admin-card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 0.75rem;
+}
+
+.admin-command-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.admin-command-row:last-child { border-bottom: none; }
+
+.admin-cmd {
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: var(--accent-admin);
+  white-space: nowrap;
+  background: rgba(245, 158, 11, 0.08);
+  padding: 0.15rem 0.4rem;
+  border-radius: 5px;
+  min-width: 100px;
+}
+
+.admin-cmd-desc {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+/* --- Статистика --- */
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.admin-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.3rem;
+  padding: 1rem 0.75rem;
+  background: var(--admin-card-bg);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  border-radius: 14px;
+}
+
+.admin-stat-icon { font-size: 1.5rem; }
+.admin-stat-label {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.3;
+}
+.admin-stat-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--accent-admin);
+}
+.admin-stat-hint {
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+/* --- Список користувачів --- */
+.admin-users-table {
+  background: var(--admin-card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.admin-users-header {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  background: rgba(245, 158, 11, 0.08);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.admin-user-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.admin-user-row:last-child { border-bottom: none; }
+
+.admin-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.admin-mini-crown { font-size: 0.9rem; }
+
+.admin-user-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.admin-user-id {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+}
+
+.admin-user-ep {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent-admin);
+  white-space: nowrap;
+}
+
+.admin-user-level {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* --- Форма --- */
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  background: var(--admin-card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.admin-form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.admin-form-input,
+.admin-form-textarea {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.admin-form-input:focus,
+.admin-form-textarea:focus {
+  border-color: var(--accent-admin);
+}
+.admin-form-textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.5;
+}
+
+.admin-char-count {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+.admin-quick-amounts {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.admin-quick-btn {
+  padding: 0.35rem 0.7rem;
+  border-radius: 20px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: transparent;
+  color: var(--accent-admin);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.admin-quick-btn.active,
+.admin-quick-btn:hover {
+  background: var(--accent-admin);
+  color: #000;
+}
+
+.admin-generate-btn {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: none;
+  background: var(--accent-admin);
+  color: #000;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.admin-generate-btn:hover { opacity: 0.9; }
+.admin-generate-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* --- Результат (команда для бота) --- */
+.admin-result-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.admin-result-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-result-code {
+  display: block;
+  font-size: 0.85rem;
+  font-family: monospace;
+  color: var(--accent-admin);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.75rem;
+  border-radius: 10px;
+  word-break: break-all;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.broadcast-code {
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.admin-result-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.admin-result-hint {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* --- Кнопки --- */
+.admin-copy-btn {
+  padding: 0.45rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: transparent;
+  color: var(--accent-admin);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.admin-copy-btn:hover { background: rgba(245, 158, 11, 0.1); }
+.admin-copy-btn.large { flex: 1; padding: 0.6rem; font-size: 0.85rem; }
+
+.admin-open-bot-btn {
+  display: inline-block;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  border: none;
+  background: rgba(0, 136, 204, 0.15);
+  color: #0088cc;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+  text-align: center;
+}
+.admin-open-bot-btn:hover { background: rgba(0, 136, 204, 0.25); }
+
+/* --- Секція дій --- */
+.admin-action-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: var(--admin-card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.admin-action-section h3 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.2rem;
+}
+
+.admin-copy-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.admin-copy-row:last-of-type { border-bottom: none; }
+.admin-copy-row code {
+  font-size: 0.82rem;
+  font-family: monospace;
+  color: var(--accent-admin);
+}
+
+/* --- Шаблони розсилки --- */
+.admin-templates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.admin-template-btn {
+  padding: 0.35rem 0.7rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.admin-template-btn:hover {
+  border-color: var(--accent-admin);
+  color: var(--accent-admin);
+}
+
+/* --- Промокоди --- */
+.admin-promo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-promo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--admin-card-bg);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+}
+
+.admin-promo-info { flex: 1; }
+
+.admin-promo-code {
+  font-size: 0.9rem;
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--accent-admin);
+}
+
+.admin-promo-desc {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-top: 0.2rem;
+}
+
+.admin-promo-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-promo-ep {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #10b981;
+  white-space: nowrap;
+}
+
+/* --- Системна інформація --- */
+.admin-sys-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--admin-card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.admin-sys-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  gap: 0.5rem;
+}
+.admin-sys-row:last-child { border-bottom: none; }
+
+.admin-sys-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+.admin-sys-value {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent-admin);
+  text-align: right;
+}
