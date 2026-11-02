@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 function getWeatherMeta(code) {
   const weatherCodes = {
@@ -29,7 +29,7 @@ export default function WeatherScreen({ showToast }) {
   });
   const [loading, setLoading] = useState(false);
 
-  const fetchWeatherForCity = async (name) => {
+  const fetchWeatherForCity = useCallback(async (name) => {
     const targetCity = name.trim();
     if (!targetCity) return;
 
@@ -59,11 +59,10 @@ export default function WeatherScreen({ showToast }) {
       const current = weatherData.current_weather;
       const t = Math.round(current.temperature);
       const windSpeed = current.windspeed;
-      const currentHour = new Date().getHours();
-      const hum =
-        weatherData.hourly?.relativehumidity_2m?.[currentHour] ??
-        weatherData.hourly?.relativehumidity_2m?.[0] ??
-        50;
+      
+      const humidityList = weatherData.hourly?.relativehumidity_2m;
+      const hum = humidityList && humidityList.length > 0 ? humidityList[0] : 50;
+      
       const meta = getWeatherMeta(current.weathercode);
 
       setWeather({
@@ -81,12 +80,12 @@ export default function WeatherScreen({ showToast }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchWeatherForCity('Київ');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchWeatherForCity]);
 
   const handleSearch = () => {
     fetchWeatherForCity(cityInput);
@@ -139,4 +138,3 @@ export default function WeatherScreen({ showToast }) {
     </div>
   );
 }
-
