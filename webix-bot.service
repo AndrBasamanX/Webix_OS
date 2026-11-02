@@ -1,0 +1,15 @@
+[Unit]
+Description=Webix OS Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/Webix_OS
+ExecStart=/opt/Webix_OS/venv/bin/python backend/bot.py
+Restart=always
+RestartSec=5
+EnvironmentFile=/opt/Webix_OS/.env
+
+[Install]
+WantedBy=multi-user.target
